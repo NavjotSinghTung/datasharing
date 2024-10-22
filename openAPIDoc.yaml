@@ -1,0 +1,913 @@
+openapi: 3.0.3
+info:
+  title: AEHSC Application
+  description: |-
+    This is a AEHSC server API specifications
+  contact:
+    email: contact@alertenterprise.com
+  version: 12.1M2
+servers:
+  - url: <AgentURL>
+tags:
+  - name: Location
+  - name: Authentication
+paths:
+  /api/auth/token:
+    post:
+      tags:
+        - Authentication
+      summary: Generate Access Token
+      description: In this API user send's username and password for generating a unique bearer access token, which is being used by other api's.
+      operationId: token
+      parameters:
+        - name: grant_type
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Generate Auth token call payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Auth'
+        required: true
+      responses:
+        '200':
+          description: Auth token generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Validation Errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unhandled Server Errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/auth/checktoken:
+    post:
+      tags:
+        - Authentication
+      summary: Check Access Token
+      description: Validates token and determines if additional authentication or SSO configuration is needed.
+      operationId: checktoken
+      requestBody:
+        description: Generate Auth token call payload
+        content:
+          application/json:
+            schema:
+              properties:
+                appLogin:
+                  type: boolean
+                  example: true
+        required: true
+      responses:
+        '200':
+          description: Auth token generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Validation Errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unhandled Server Errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/location/find:
+    post:
+      tags:
+        - Location
+      summary: Find Location
+      description: This api is used to fetch locations on the basis of some given criteria
+      operationId: find
+      requestBody:
+        description: Search Criteria to find Locations
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchCriteria'
+        required: true
+      responses:
+        '200':
+          description: Locations fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Validation Errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unhandled Server Errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/location/save:
+    post:
+      tags:
+        - Location
+      summary: Save Location
+      description: This api is used to save location
+      operationId: save
+      requestBody:
+        description: Search Criteria to find Locations
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationDTO'
+        required: true
+      responses:
+        '200':
+          description: Location saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Validation Errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unhandled Server Errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/location/update:
+    post:
+      tags:
+        - Location
+      summary: Update Location
+      description: This api is used to update location
+      operationId: update
+      requestBody:
+        description: Location object to be updated
+        content:
+          text/json:
+            schema:
+              type: object
+              $ref: '#/components/schemas/LocationDTO'
+      responses:
+        '200':
+          description: Location updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Validation Errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unhandled Server Errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/location/{id}:
+    get:
+      tags: 
+        - Location
+      summary: Find Location API
+      description: Find location on the basis of it's id
+      operationId: get
+      parameters: 
+        - name: id
+          in: path
+          description: Id of the location to be fetched
+          required: true
+          schema:
+            type: integer
+            example: 4567845321
+      responses:
+        '200':
+          description: Location fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Validation Errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unhandled Server Errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Subquery:
+      type: object
+      properties:
+        columnName:
+          type: string
+          description: The name of the column used in the subquery.
+          example: "user_id"
+        domainClass:
+          type: string
+          description: The fully qualified name of the domain class associated with the subquery.
+          example: "com.example.domain.User"
+        isDistinct:
+          type: boolean
+          description: Whether the subquery should return distinct values.
+          example: false
+        whereClauseValues:
+          type: object
+          additionalProperties:
+            type: object
+          description: A map of values used in the WHERE clause of the subquery.
+          example:
+            status: "active"
+            type: "premium"
+    Criteria:
+      type: object
+      properties:
+        fieldName:
+          type: string
+          description: The name of the field to which the criteria applies.
+          example: "age"
+        operator:
+          type: string
+          description: The operator used for comparison.
+          example: "EQUALS"
+        value:
+          type: string
+          description: The value to compare against the field.
+          example: "30"
+        objectVal:
+          type: object
+          description: An object value for complex criteria.
+        valueList:
+          type: array
+          items:
+            type: object
+          description: A list of values for criteria that involve multiple values.
+          example:
+            - "value1"
+            - "value2"
+        isAnd:
+          type: boolean
+          description: Indicates if the criteria should be combined with an AND operator.
+          example: true
+        isDistinct:
+          type: boolean
+          description: Indicates if the criteria should apply a DISTINCT operation.
+          example: false
+        nestedCriteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/Criteria'
+          description: A list of nested criteria for more complex queries.
+        subquery:
+          $ref: '#/components/schemas/Subquery'
+          description: A subquery for more advanced criteria.
+    SearchCriteria:
+      type: object
+      properties:
+        filterCriteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/Criteria'
+          description: List of criteria to filter results.
+          example:
+            - fieldName: "status"
+              operator: "EQUALS"
+              value: "active"
+        sortByString:
+          type: string
+          description: Sort by field as a string, parsed in base controller.
+        sortBy:
+          type: array
+          items:
+            type: object
+          description: List of sort criteria.
+        page:
+          type: integer
+          description: Page number for pagination.
+          example: 1
+        size:
+          type: integer
+          description: Number of items per page.
+          example: 50
+        totalSize:
+          type: integer
+          description: Total number of items available (not necessarily the number of items in the current page).
+          example: 200
+        userId:
+          type: integer
+          description: ID of the user making the request.
+          example: 12345
+        intStatus:
+          type: array
+          items:
+            type: integer
+          description: List of integer status codes.
+          example:
+            - 0
+            - 9
+        applyIntStatusClause:
+          type: boolean
+          description: Whether to apply integer status clause.
+          example: true
+        applyChangedOnSort:
+          type: boolean
+          description: Whether to apply changed-on-sort.
+          example: false
+        attributes:
+          type: array
+          items:
+            type: string
+          description: List of attributes to include in the results.
+          example:
+            - "name"
+            - "email"
+        projectionList:
+          type: array
+          items:
+            type: string
+          description: List of fields to include in the projection.
+          example:
+            - "field1"
+            - "field2"
+        unpaged:
+          type: boolean
+          description: Whether pagination is disabled.
+          example: false
+        nestedObjectFilterId:
+          type: array
+          items:
+            type: string
+          description: List of IDs for nested object filters.
+          example:
+            - "filterId1"
+            - "filterId2"
+        searchRuleExtIds:
+          type: array
+          items:
+            type: string
+            example: RUL-0098
+          description: List of external search rule IDs.
+        searchRuleIds:
+          type: array
+          items:
+            type: integer
+          description: List of search rule IDs.
+        applyProjectionToQuery:
+          type: boolean
+          description: Whether to apply projection to the query.
+          example: false
+        searchRuleParams:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchRuleParam'
+          description: List of search rule parameters.
+    SearchRuleParam:
+      type: object
+      properties:
+        busObjType:
+          type: string
+          description: Type of the business object.
+          example: "Identity"
+        busObjId:
+          type: string
+          description: ID of the business object.
+          example: "12345"
+    Auth:
+      required:
+        - username
+        - password
+      type: object
+      properties:
+        username :
+          type : string
+          example : "admin"
+        password : 
+          type : string
+          example : "Alert@1234"
+    ApiResponse:
+      required:
+        - success
+        - messages
+        - data
+      type: object
+      properties:
+        success :
+          type : boolean
+          example : TRUE
+        messages : 
+          type : array
+          nullable : true
+          items:
+            type: string
+        data : 
+          type : object
+          nullable : true
+    ErrorResponse:
+      required:
+        - success
+        - messages
+      type: object
+      properties:
+        success :
+          type : boolean
+          example : FALSE
+        messages : 
+          type : array
+          items:
+            type: object
+    LocationDTO:
+      required: null
+      type: null
+      properties:
+        id:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        id_str:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        clientSequenceId:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        requestUuid:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        skipValidationToken:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        messages:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        isReplaceEntityWhenFound:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        apiSource:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        busObjCat:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        skipSaveMessages:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: '#/components/schemas/boolean'
+          nullable: null
+        stepNameParallelFieldValue:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        deletedSubIds:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        intStatus:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        createdBy:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        createdOn:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        changedBy:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        changedOn:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        objectLastChangedOn:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        intSubStatus:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        doNotReplaceList:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: '#/components/schemas/boolean'
+          nullable: null
+        replaceChildList:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        createMode:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: '#/components/schemas/boolean'
+          nullable: null
+        extId:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        text:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        description:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        type:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        company:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        companyId:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        customProperties:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        extCreatedOn:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        sourceId:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        parentLocationId:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        building:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        floor:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        streetAddress:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        postalCode:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        city:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        stateProvince:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        latitude:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        longitude:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        locationType:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        locationSubType:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        countryList:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        customFields:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        countryId:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        regionId:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        logo:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        stgLocationDataId:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        locationOwners:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        locationOwnerIds:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        timeZone:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        totalCapacity:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        totalAssigned:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+        getenableLocationAccessCheck:
+          required: null
+          type: null
+          properties: null
+          description: null
+          format: null
+          $ref: ''
+          nullable: null
+      description: null
+      format: null
+      $ref: ''
+      nullable: null
+    boolean:
+      required: null
+      type: null
+      properties: null
+      description: null
+      format: null
+      $ref: ''
+      nullable: null
+    integer:
+      required: null
+      type: null
+      properties: null
+      description: null
+      format: null
+      $ref: ''
+      nullable: null
+    Result:
+      required: null
+      type: null
+      properties: null
+      description: null
+      format: null
+      $ref: ''
+      nullable: null
+  securitySchemes:
+    bearerToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
